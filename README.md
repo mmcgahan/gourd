@@ -18,8 +18,6 @@ Analytics dashboard framework written in golang and AngularJS
     - # points on graph
     - update rate
 
-- heroku deployment
-
 
 # Features
 
