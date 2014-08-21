@@ -94,8 +94,10 @@ func generate() {
 	rand.Seed(42)
 	labels := []string{"A", "B", "C"} // all possible Point Labels
 	for {
-		idx := rand.Intn(len(labels))
-		Publish(&Point{rand.Intn(10), rand.Intn(10), labels[idx]})
+		// idx := rand.Intn(len(labels))
+		Publish(&Point{rand.Intn(10), rand.Intn(10), labels[0]})
+		// Publish(&Point{rand.Intn(10), rand.Intn(10), labels[1]})
+		// Publish(&Point{rand.Intn(10), rand.Intn(10), labels[2]})
 		time.Sleep(time.Second * time.Duration(rate))
 	}
 }
