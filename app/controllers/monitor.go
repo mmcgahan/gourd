@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"code.google.com/p/go.net/websocket"
+	"github.com/mmcgahan/gourd/app/stream"
 	"github.com/revel/revel"
-	"gourd/app/stream"
 	"strconv"
 )
 
