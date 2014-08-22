@@ -11,29 +11,38 @@ type WebSocket struct {
 	*revel.Controller
 }
 
+func listen(ws *websocket.Conn, newMessages chan string) {
+	// listener on socket
+	var msg string
+	for {
+		err := websocket.Message.Receive(ws, &msg)
+		if err != nil {
+			close(newMessages)
+			return
+		}
+		newMessages <- msg
+	}
+}
+
 func (c WebSocket) StreamSocket(ws *websocket.Conn) revel.Result {
-	// activate new Stream, with NewPoints channel
+	// websocket now open, let up general listener
+	newMessages := make(chan string)
+	go listen(ws, newMessages)
+
+	// 1. publish what data sources are available
+	// websocket.JSON.Send(ws, &arrayOfSources)
+	//
+	// 2. listen for which sources should be published
+	// for { select { case sources, ok := <-newMessages } }
+	//
+	// 3. activate new Stream, with NewPoints channel for this socket
+	// watcher := stream.Watch(sources)
 	watcher := stream.Watch()
 	defer watcher.Unwatch()
 
-	// In order to select between websocket messages and newPoint data, we
-	// need to stuff websocket events into a channel.
-	newMessages := make(chan string)
-	go func() {
-		// listener on socket
-		var msg string
-		for {
-			err := websocket.Message.Receive(ws, &msg)
-			if err != nil {
-				close(newMessages)
-				return
-			}
-			newMessages <- msg
-		}
-	}()
-
-	// Now listen for new data
-	// on the websocket (data) and newMessages (msg, ok).
+	// Now listen for new data:
+	// 	a. new points from stream (watcher.NewPoints)
+	// 	b. throttling values from client (newMessages)
 	for {
 		select {
 		case point := <-watcher.NewPoints:
@@ -43,14 +52,12 @@ func (c WebSocket) StreamSocket(ws *websocket.Conn) revel.Result {
 				// They disconnected.
 				return nil
 			}
-		case rate, ok := <-newMessages:
-			// process received message on the socket
-			// If the channel is closed, they disconnected.
+		case msg, ok := <-newMessages:
+			// throttle
 			if !ok {
 				return nil
 			}
-			// Otherwise, say something.
-			i, _ := strconv.Atoi(rate)
+			i, _ := strconv.Atoi(msg)
 			stream.Throttle(i)
 		}
 	}

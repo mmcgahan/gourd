@@ -24,9 +24,7 @@ func (s Stream) Unwatch() {
 }
 
 func Watch() Stream {
-	// resp := make(chan Stream) // make new channel of Streams
-	// watch <- resp             // put the new Stream into the watch channel
-	// return <-resp             // return the sending-only channel
+	// this could take an array of data sources to watch
 	stream := Stream{make(chan Point)}
 	watch <- stream
 	return stream
@@ -96,8 +94,6 @@ func generate() {
 	for {
 		// idx := rand.Intn(len(labels))
 		Publish(&Point{rand.Intn(10), rand.Intn(10), labels[0]})
-		// Publish(&Point{rand.Intn(10), rand.Intn(10), labels[1]})
-		// Publish(&Point{rand.Intn(10), rand.Intn(10), labels[2]})
 		time.Sleep(time.Second * time.Duration(rate))
 	}
 }
